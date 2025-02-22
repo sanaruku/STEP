@@ -67,47 +67,60 @@ function createTriangle(coords, level = 1) {
     });
 }
 
-// Define the vertices of an icosahedron (approximated for a spherical Earth)
-const phi = (1 + Math.sqrt(5)) / 2; // Golden ratio
-const vertices = [
-    [0, 1, phi], [0, -1, phi], [0, 1, -phi], [0, -1, -phi],
-    [1, phi, 0], [-1, phi, 0], [1, -phi, 0], [-1, -phi, 0],
-    [phi, 0, 1], [-phi, 0, 1], [phi, 0, -1], [-phi, 0, -1]
-];
+// Define the latitudes for slicing
+const northLatitude = 80; // 80° North
+const southLatitude = -80; // 80° South
 
-// Convert 3D vertices to latitude and longitude
-function toLatLng([x, y, z]) {
-    const lat = Math.atan2(z, Math.sqrt(x * x + y * y)) * (180 / Math.PI);
-    const lng = Math.atan2(y, x) * (180 / Math.PI);
-    return [lat, lng];
+// Define the number of divisions (e.g., 12 divisions for 24 triangles)
+const divisions = 12;
+const longitudeStep = 360 / divisions; // 30° per division
+
+// Create triangles in the Northern Hemisphere
+for (let i = 0; i < divisions; i++) {
+    const startLng = -180 + i * longitudeStep;
+    const endLng = startLng + longitudeStep;
+
+    // Define the vertices of the triangle (base on the north side)
+    const triangleCoords = [
+        [northLatitude, startLng], // Top-left vertex
+        [northLatitude, endLng],   // Top-right vertex
+        [0, (startLng + endLng) / 2] // Bottom vertex (midpoint)
+    ];
+
+    // Create the triangle
+    createTriangle(triangleCoords);
 }
 
-// Define the 20 triangles of the icosahedron
-const triangles = [
-    [vertices[0], vertices[1], vertices[8]],
-    [vertices[0], vertices[8], vertices[4]],
-    [vertices[0], vertices[4], vertices[5]],
-    [vertices[0], vertices[5], vertices[9]],
-    [vertices[0], vertices[9], vertices[1]],
-    [vertices[1], vertices[9], vertices[10]],
-    [vertices[1], vertices[10], vertices[6]],
-    [vertices[1], vertices[6], vertices[8]],
-    [vertices[8], vertices[6], vertices[2]],
-    [vertices[8], vertices[2], vertices[4]],
-    [vertices[4], vertices[2], vertices[7]],
-    [vertices[4], vertices[7], vertices[5]],
-    [vertices[5], vertices[7], vertices[3]],
-    [vertices[5], vertices[3], vertices[9]],
-    [vertices[9], vertices[3], vertices[10]],
-    [vertices[10], vertices[3], vertices[11]],
-    [vertices[10], vertices[11], vertices[6]],
-    [vertices[6], vertices[11], vertices[2]],
-    [vertices[2], vertices[11], vertices[7]],
-    [vertices[7], vertices[11], vertices[3]]
-];
+// Create triangles in the Southern Hemisphere
+for (let i = 0; i < divisions; i++) {
+    const startLng = -180 + i * longitudeStep;
+    const endLng = startLng + longitudeStep;
 
-// Create the 20 triangles on the map
-triangles.forEach(triangle => {
-    const coords = triangle.map(vertex => toLatLng(vertex));
-    createTriangle(coords);
-});
+    // Define the vertices of the triangle (base on the south side)
+    const triangleCoords = [
+        [southLatitude, startLng], // Bottom-left vertex
+        [southLatitude, endLng],   // Bottom-right vertex
+        [0, (startLng + endLng) / 2] // Top vertex (midpoint)
+    ];
+
+    // Create the triangle
+    createTriangle(triangleCoords);
+}
+
+// Add a central boundary line for visualization
+const centralVerticalLine = L.polyline(
+    [
+        [90, 0], // North Pole
+        [-90, 0] // South Pole
+    ],
+    { color: 'red', weight: 2 }
+).addTo(map);
+
+// Add a central horizontal line at the equator
+const centralHorizontalLine = L.polyline(
+    [
+        [0, -180],  // Leftmost longitude at the equator
+        [0, 180]    // Rightmost longitude at the equator
+    ],
+    { color: 'blue', weight: 2 }
+).addTo(map);
