@@ -2,15 +2,18 @@ const map = L.map('map', {
     doubleClickZoom: false
 }).setView([0, 0], 2);
 
-let userMaker;
+let userMarker;
 
 map.locate({ setView: true, maxZoom: 16 });
 
 map.on('locationfound', (e) => {
-    if (userMaker) {
-        map.removeLayer(userMaker);
+    if (userMarker) {
+        map.removeLayer(userMarker);
     }
-    userMaker = L.marker(e.latlng).addTo(map).bindPopup('You are here').openPopup();
+    userMarker = L.marker(e.latlng).addTo(map).bindPopup('You are here').openPopup();
+
+    // Adjust the triangle such that the user's location is the centroid
+    adjustTriangleToUserLocation(e.latlng);
 });
 
 map.on('locationerror', function () {
@@ -27,22 +30,52 @@ L.tileLayer('https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{
     maxZoom: 20,
 }).addTo(map);
 
-// Function to create a triangle with click behavior
-function createTriangle(coords, level = 1) {
-    const triangle = L.polygon(coords, { color: 'white', fillColor: 'white', fillOpacity: 0 }).addTo(map);
+// Example triangle definition (just for initial placement)
+const triangleCoords = [
+    [10, -10],  // Point 1: Latitude 10, Longitude -10
+    [0, 20],    // Point 2: Latitude 0, Longitude 20
+    [-10, -10]  // Point 3: Latitude -10, Longitude -10
+];
 
-    let clickCount = 0;
+// Create a polygon (triangle) and add it to the map
+let triangle = L.polygon(triangleCoords, { color: 'white', fillColor: 'white', fillOpacity: 0 }).addTo(map);
+
+// Function to adjust triangle position such that the user's location is the centroid
+function adjustTriangleToUserLocation(userLatLng) {
+    // Triangle centroid formula: (A + B + C) / 3
+    const centroid = L.latLng(userLatLng.lat, userLatLng.lng); // User's location is the centroid
+
+    // Calculate the difference between the original centroid and the new centroid
+    const originalCentroid = L.latLng(
+        (triangleCoords[0][0] + triangleCoords[1][0] + triangleCoords[2][0]) / 3,
+        (triangleCoords[0][1] + triangleCoords[1][1] + triangleCoords[2][1]) / 3
+    );
+
+    const offsetLat = centroid.lat - originalCentroid.lat;
+    const offsetLng = centroid.lng - originalCentroid.lng;
+
+    // Adjust the triangle's vertices by the calculated offset
+    const adjustedCoords = triangleCoords.map(coord => {
+        return [coord[0] + offsetLat, coord[1] + offsetLng];
+    });
+
+    // Update the triangle's position
+    triangle.setLatLngs(adjustedCoords);
+}
+
+function addTriangleClickListeners(triangle, currentLevel) {
+    let triangleClickCount = 0;
     const maxLevel = 19;
 
     triangle.on('click', function () {
-        clickCount++;
-        if (clickCount < 11) {
+        triangleClickCount++;
+        if (triangleClickCount < 11) {
             const currentOpacity = this.options.fillOpacity;
             if (currentOpacity < 1) {
                 this.setStyle({ fillOpacity: currentOpacity + 0.1 });
             }
         } else {
-            if (level < maxLevel) {
+            if (currentLevel < maxLevel) {
                 const latlngs = this.getLatLngs()[0]; // Get the current triangle’s vertices
                 const [A, B, C] = latlngs;
 
@@ -52,13 +85,23 @@ function createTriangle(coords, level = 1) {
                 const CA_mid = L.latLng((C.lat + A.lat) / 2, (C.lng + A.lng) / 2);
 
                 // Create four new triangles at the next level
-                createTriangle([A, AB_mid, CA_mid], level + 1);
-                createTriangle([B, AB_mid, BC_mid], level + 1);
-                createTriangle([C, BC_mid, CA_mid], level + 1);
-                createTriangle([AB_mid, BC_mid, CA_mid], level + 1);
+                const triangle1 = L.polygon([A, AB_mid, CA_mid], { color: 'white', fillColor: 'white', fillOpacity: 0 }).addTo(map);
+                addTriangleClickListeners(triangle1, currentLevel + 1);
+
+                const triangle2 = L.polygon([B, AB_mid, BC_mid], { color: 'white', fillColor: 'white', fillOpacity: 0 }).addTo(map);
+                addTriangleClickListeners(triangle2, currentLevel + 1);
+
+                const triangle3 = L.polygon([C, BC_mid, CA_mid], { color: 'white', fillColor: 'white', fillOpacity: 0 }).addTo(map);
+                addTriangleClickListeners(triangle3, currentLevel + 1);
+
+                const triangle4 = L.polygon([AB_mid, BC_mid, CA_mid], { color: 'white', fillColor: 'white', fillOpacity: 0 }).addTo(map);
+                addTriangleClickListeners(triangle4, currentLevel + 1);
 
                 // Remove the original triangle after splitting
                 map.removeLayer(this);
+
+                // Update the current level in the DOM
+                document.getElementById('current-level').textContent = currentLevel + 1;
             } else {
                 // At max level, change triangle to red and prevent further divisions
                 this.setStyle({ fillColor: 'red', fillOpacity: 1 });
@@ -67,6 +110,10 @@ function createTriangle(coords, level = 1) {
     });
 }
 
+<<<<<<< HEAD
+// When you create a new triangle, start with level 1
+addTriangleClickListeners(triangle, 1);
+=======
 // Define the latitudes for slicing
 const northLatitude = 80; // 80° North
 const southLatitude = -80; // 80° South
@@ -124,3 +171,4 @@ const centralHorizontalLine = L.polyline(
     ],
     { color: 'blue', weight: 2 }
 ).addTo(map);
+>>>>>>> df56e39752a67844662f54aa55a59580194011b1
