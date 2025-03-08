@@ -3,19 +3,30 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Icosahedron Map</title>
+    <title>Sanarku Map Game</title>
     <link
       rel="stylesheet"
       href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
     />
-    <style>
-      #map {
-        height: 100vh;
-      }
-    </style>
+    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div id="map"></div>
+    <h1>Sanarku</h1>
+    <div id="instructions">
+      Click triangles to change opacity. When full, they split into smaller
+      ones!
+    </div>
+    <div class="container">
+      <div class="sidebar">
+        <h2>Game Info</h2>
+        <p>Click a triangle to increase its opacity.</p>
+
+        <p>Max level: <span id="max-level">19</span></p>
+        <p class="status">Current Level: <span id="current-level">1</span></p>
+      </div>
+      <div id="map"></div>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="app.js"></script>
   </body>
