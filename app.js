@@ -110,10 +110,10 @@ function addTriangleClickListeners(triangle, currentLevel) {
     });
 }
 
-<<<<<<< HEAD
+
 // When you create a new triangle, start with level 1
 addTriangleClickListeners(triangle, 1);
-=======
+
 // Define the latitudes for slicing
 const northLatitude = 80; // 80° North
 const southLatitude = -80; // 80° South
@@ -171,4 +171,4 @@ const centralHorizontalLine = L.polyline(
     ],
     { color: 'blue', weight: 2 }
 ).addTo(map);
->>>>>>> df56e39752a67844662f54aa55a59580194011b1
+
