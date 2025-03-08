@@ -1,0 +1,52 @@
+/* General page styling */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #121212;
+    color: #fff;
+    text-align: center;
+}
+
+/* Game title */
+h1 {
+    margin: 10px;
+    font-size: 28px;
+    text-transform: uppercase;
+    color: #ffcc00;
+    letter-spacing: 2px;
+}
+
+/* Instructions */
+#instructions {
+    font-size: 16px;
+    margin-bottom: 10px;
+    color: #bbb;
+}
+
+/* Main container */
+.container {
+    display: flex;
+    height: 90vh;
+}
+
+/* Sidebar for instructions and controls */
+.sidebar {
+    width: 300px;
+    background: rgba(0, 0, 0, 0.7);
+    padding: 20px;
+    box-shadow: 2px 0 10px rgba(255, 255, 255, 0.2);
+}
+
+/* Map styling */
+#map {
+    flex-grow: 1;
+    height: 100%;
+    border-left: 3px solid #ffcc00;
+}
+
+/* Game status */
+.status {
+    margin-top: 10px;
+    font-size: 18px;
+    color: #ffcc00;
+}
